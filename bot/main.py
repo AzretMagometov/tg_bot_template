@@ -3,7 +3,7 @@ import logging
 
 from bot.core.loader import dp, bot
 from bot.handlers import get_handlers_router
-from utils.logging import setup_logging_base_config
+from bot.utils.logging import setup_logging_base_config
 
 setup_logging_base_config()
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ async def on_startup() -> None:
 
     logger.info((await bot.get_me()).model_dump_json(indent=4, exclude_none=True))
 
-    logger.info("bot started...")
+    logger.info("bot started")
 
 
 async def on_shutdown() -> None:

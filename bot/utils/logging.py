@@ -16,13 +16,6 @@ def setup_logging_base_config(path: Optional[str] = None):
     :param path: Путь к файлу логов. Если None, используется переменная окружения LOG_FILE_PATH или 'logs/app.log'.
     """
     # Загрузка переменных окружения из .env файла
-    dotenv_path = find_dotenv()
-    if dotenv_path:
-        load_dotenv(dotenv_path)
-    else:
-        # Настройка базового логирования для вывода предупреждений
-        logging.basicConfig(level=logging.WARNING)
-        logging.warning(".env файл не найден. Используются стандартные настройки логирования.")
 
     if path is None:
         # Попытка получить путь из переменной окружения
