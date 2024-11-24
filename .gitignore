@@ -321,3 +321,4 @@ cython_debug/
 #.idea/
 
 logs/
+.idea/

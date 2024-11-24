@@ -1,23 +1,33 @@
-import os
-from typing import Optional
-
-from dotenv import load_dotenv, find_dotenv
-from pydantic import BaseModel
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class BotConfig(BaseModel):
-    tg_token: str
+class EnvBaseSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
-def read_config_from_env(path: Optional[str] = None) -> BotConfig:
-    if path:
-        load_dotenv(path)
-    else:
-        load_dotenv(find_dotenv())
-
-    return BotConfig(
-        tg_token=os.getenv('TG_TOKEN')
-    )
+class BotSettings(EnvBaseSettings):
+    BOT_TOKEN: str
 
 
-main_config = read_config_from_env()
+class CacheSettings(EnvBaseSettings):
+    REDIS_HOST: str = "redis"
+    REDIS_PORT: int = 6379
+    REDIS_PASS: str | None = None
+
+    # REDIS_DATABASE: int = 1
+    # REDIS_USERNAME: int | None = None
+    # REDIS_TTL_STATE: int | None = None
+    # REDIS_TTL_DATA: int | None = None
+
+    @property
+    def redis_url(self) -> str:
+        if self.REDIS_PASS:
+            return f"redis://{self.REDIS_PASS}@{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+
+
+class Settings(BotSettings, CacheSettings):
+    DEBUG: bool = True
+
+
+settings = Settings()

@@ -10,9 +10,44 @@ services:
       - .env
     volumes:
       - ./logs:/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    networks:
+      - app_network
+
+
     # Если вы используете webhook и хотите пробросить порт
     # ports:
     #   - "8443:8443"
+
+  redis:
+    image: "redis:7-alpine"
+    container_name: ${COMPOSE_PROJECT_NAME}-redis
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - ${REDIS_PORT}:6379
+    volumes:
+      - ./redis_data:/data
+    networks:
+      - app_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+
+
+volumes:
+  redis_data:
+
+networks:
+  app_network:
+
 
 
 # The commented out section below is an example of how to define a PostgreSQL
