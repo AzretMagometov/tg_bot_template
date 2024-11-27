@@ -32,7 +32,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir -r requirements.txt
 
 # Копируем остальной код приложения
-COPY bot/ ./bot/
+COPY . .
+
 
 # Переключаемся на непривилегированного пользователя
 USER appuser

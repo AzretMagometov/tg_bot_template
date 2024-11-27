@@ -15,4 +15,6 @@ class UserModel(Base):
     is_blocked: Mapped[bool] = mapped_column(default=False)
     is_premium: Mapped[bool] = mapped_column(default=False)
 
+    is_happy: Mapped[bool] = mapped_column(default=True)
+
     created_at: Mapped[created_at]

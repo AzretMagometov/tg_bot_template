@@ -323,3 +323,5 @@ cython_debug/
 logs/
 .idea/
 redis_data/
+/backups_data/
+/postgres_data/
