@@ -322,3 +322,4 @@ cython_debug/
 
 logs/
 .idea/
+redis_data/

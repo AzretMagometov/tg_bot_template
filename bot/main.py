@@ -3,6 +3,7 @@ import logging
 
 from bot.core.loader import dp, bot
 from bot.handlers import get_handlers_router
+from bot.middleware import register_middlewares
 from bot.utils.logging import setup_logging_base_config
 
 setup_logging_base_config()
@@ -11,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 async def on_startup() -> None:
     logger.info("bot starting...")
+
+    register_middlewares(dp)
 
     dp.include_router(get_handlers_router())
 

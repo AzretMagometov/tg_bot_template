@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy import URL
 
 
 class EnvBaseSettings(BaseSettings):
@@ -14,11 +15,6 @@ class CacheSettings(EnvBaseSettings):
     REDIS_PORT: int = 6379
     REDIS_PASS: str | None = None
 
-    # REDIS_DATABASE: int = 1
-    # REDIS_USERNAME: int | None = None
-    # REDIS_TTL_STATE: int | None = None
-    # REDIS_TTL_DATA: int | None = None
-
     @property
     def redis_url(self) -> str:
         if self.REDIS_PASS:
@@ -26,8 +22,24 @@ class CacheSettings(EnvBaseSettings):
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
 
 
-class Settings(BotSettings, CacheSettings):
+class DatabaseSettings(EnvBaseSettings):
+
+    DB_HOST: str = "postgres"
+    DB_PORT: int = 5432
+    DB_USER: str = "postgres"
+    DB_PASS: str | None = None
+    DB_NAME: str = "postgres"
+
+    @property
+    def database_url(self) -> URL | str:
+        if self.DB_PASS:
+            return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return f"postgresql+asyncpg://{self.DB_USER}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+
+class Settings(BotSettings, CacheSettings, DatabaseSettings):
     DEBUG: bool = True
+    RATE_LIMIT: int | float = 0.5
 
 
 settings = Settings()
