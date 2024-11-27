@@ -13,11 +13,17 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      pgbouncer:
+        condition: service_healthy
     networks:
       - app_network
-
-
-    # Если вы используете webhook и хотите пробросить порт
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8443 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    # Uncomment to expose webhook port
     # ports:
     #   - "8443:8443"
 
@@ -27,8 +33,6 @@ services:
     restart: always
     env_file:
       - .env
-    ports:
-      - ${REDIS_PORT}:6379
     volumes:
       - ./redis_data:/data
     networks:
@@ -39,7 +43,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 5s
-
 
   postgres:
     image: postgres:17-alpine
@@ -56,6 +59,12 @@ services:
       - app_network
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
   pgbouncer:
     image: edoburu/pgbouncer
@@ -68,16 +77,19 @@ services:
       - DB_PASSWORD=${DB_PASS}
       - DB_HOST=postgres
       - POOL_MODE=session
-      - MAX_DB_CONNECTIONS=0
-      - DEFAULT_POOL_SIZE=40
-      - ADMIN_USERS=postgres,${DB_USER}
+      - MAX_CLIENT_CONN=100
+      - DEFAULT_POOL_SIZE=20
       - AUTH_TYPE=scram-sha-256
-    ports:
-      - ${DB_PORT}:${DB_PORT}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - app_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "postgres", "-p", "5432"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   pgbackup:
     container_name: ${COMPOSE_PROJECT_NAME}-pgbackup
@@ -88,7 +100,8 @@ services:
     networks:
       - app_network
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_DB=${DB_NAME}
@@ -100,6 +113,12 @@ services:
       - BACKUP_KEEP_WEEKS=4
       - BACKUP_KEEP_MONTHS=6
       - HEALTHCHECK_PORT=81
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h postgres -U ${DB_USER} || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
 volumes:
   redis_data:
@@ -108,5 +127,3 @@ volumes:
 
 networks:
   app_network:
-
-
