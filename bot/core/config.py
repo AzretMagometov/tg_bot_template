@@ -23,7 +23,6 @@ class CacheSettings(EnvBaseSettings):
 
 
 class DatabaseSettings(EnvBaseSettings):
-
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_USER: str = "postgres"
@@ -37,7 +36,18 @@ class DatabaseSettings(EnvBaseSettings):
         return f"postgresql+asyncpg://{self.DB_USER}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 
-class Settings(BotSettings, CacheSettings, DatabaseSettings):
+class ProxySettings(EnvBaseSettings):
+    PROXY_HOST: str
+    PROXY_PORT: int
+    PROXY_LOGIN: str
+    PROXY_PASSWORD: str
+
+    @property
+    def proxy(self) -> str:
+        return f'http://{self.PROXY_LOGIN}:{self.PROXY_PASSWORD}@{self.PROXY_HOST}:{self.PROXY_PORT}'
+
+
+class Settings(BotSettings, CacheSettings, DatabaseSettings, ProxySettings):
     DEBUG: bool = True
     RATE_LIMIT: int | float = 0.5
 
