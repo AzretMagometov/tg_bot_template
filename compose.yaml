@@ -18,7 +18,7 @@ services:
     networks:
       - app_network
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost:8443 || exit 1"]
+      test: [ "CMD-SHELL", "curl --fail http://localhost:8443 || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -34,7 +34,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./redis_data:/data
+      - redis_data:/data
     networks:
       - app_network
     healthcheck:
@@ -54,13 +54,13 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASS}
       - POSTGRES_DB=${DB_NAME}
-      - PGDATA='/var/lib/postgresql/data/pgdata'
+      - PGDATA=/var/lib/postgresql/data/pgdata
     networks:
       - app_network
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -98,7 +98,7 @@ services:
     image: prodrigestivill/postgres-backup-local
     restart: always
     volumes:
-      - ./backups_data:/backups
+      - backups_data:/backups
     networks:
       - app_network
     depends_on:
@@ -116,7 +116,7 @@ services:
       - BACKUP_KEEP_MONTHS=6
       - HEALTHCHECK_PORT=81
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h postgres -U ${DB_USER} || exit 1"]
+      test: [ "CMD-SHELL", "pg_isready -h postgres -U ${DB_USER} || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 5
